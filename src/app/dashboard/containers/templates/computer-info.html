@@ -1,0 +1,171 @@
+<div class="container-fluid px-0">
+  <div class="">
+    <mat-expansion-panel
+      #panel
+      expanded="True"
+      class="mat-elevation-z4 expansion-color rounded-0"
+      (opened)="panelOpenState = true"
+      (closed)="panelOpenState = false">
+      <mat-expansion-panel-header>
+        <mat-panel-title class="row justify-content-center text-center">
+          <p class='p-1 m-0 fs-4 fw-bold'>{{panelOpenState ? '點擊收起' : '點擊展開'}}</p>
+        </mat-panel-title>
+      </mat-expansion-panel-header>
+      <div class="row">
+        <div class="col-9">
+          <mat-card class=" shadow-sm mt-3 px-0 pt-0 pb-1 d-flex flex-column justify-content-center">
+            <div class="row justify-content-center">
+              <div *ngIf="(alertContent$ | async).display"
+                class="control-panel alert {{(alertContent$ | async).colorClass}} mb-0 border border-danger rounded-bottom text-center"
+                role="alert">
+                {{(alertContent$ | async).content}}
+              </div>
+            </div>
+            <div class="mt-3 px-3">
+              <div class="row justify-content-center align-items-center"
+                *ngIf="!['wordCloud', 'table', 'bubble'].includes(selectedMode)">
+                <div class="row mt-3 mb-2 p-0">
+                  <div class="row mb-3">
+                    <span class="fw-bold fs-4">關鍵字檢索</span>
+                  </div>
+                  <div class="col">
+                    <mat-form-field class="w-100">
+                      <mat-label>聯集(OR)關鍵字</mat-label>
+                      <mat-chip-list #orChipList>
+                        <mat-chip *ngFor="let querytext of orQueryfield" [selectable]="true" [removable]="true"
+                          (removed)="onRemoveKeywordQueryText(querytext, 'OR')">
+                          {{querytext}}
+                          <mat-icon matChipRemove>cancel</mat-icon>
+                        </mat-chip>
+                        <input placeholder="輸入新關鍵字..." [matChipInputFor]="orChipList"
+                          [matChipInputSeparatorKeyCodes]="separatorKeysCodes" [matChipInputAddOnBlur]="true"
+                          (matChipInputTokenEnd)="onAddKeywordQueryText($event, 'OR')">
+                      </mat-chip-list>
+                    </mat-form-field>
+                  </div>
+                  <div class="col">
+                    <mat-form-field class="w-100">
+                      <mat-label>交集(AND)關鍵字</mat-label>
+                      <mat-chip-list #andChipList>
+                        <mat-chip *ngFor="let querytext of andQueryfield" [selectable]="true" [removable]="true"
+                          (removed)="onRemoveKeywordQueryText(querytext, 'AND')">
+                          {{querytext}}
+                          <mat-icon matChipRemove>cancel</mat-icon>
+                        </mat-chip>
+                        <input placeholder="輸入新關鍵字..." [matChipInputFor]="andChipList"
+                          [matChipInputSeparatorKeyCodes]="separatorKeysCodes" [matChipInputAddOnBlur]="true"
+                          (matChipInputTokenEnd)="onAddKeywordQueryText($event, 'AND')">
+                      </mat-chip-list>
+                    </mat-form-field>
+                  </div>
+                  <div class="col">
+                    <mat-form-field class="w-100">
+                      <mat-label>欲排除(NOT)關鍵字</mat-label>
+                      <mat-chip-list #notChipList>
+                        <mat-chip *ngFor="let querytext of notQueryfield" [selectable]="true" [removable]="true"
+                          (removed)="onRemoveKeywordQueryText(querytext, 'NOT')">
+                          {{querytext}}
+                          <mat-icon matChipRemove>cancel</mat-icon>
+                        </mat-chip>
+                        <input placeholder="輸入新關鍵字..." [matChipInputFor]="notChipList"
+                          [matChipInputSeparatorKeyCodes]="separatorKeysCodes" [matChipInputAddOnBlur]="true"
+                          (matChipInputTokenEnd)="onAddKeywordQueryText($event, 'NOT')">
+                      </mat-chip-list>
+                    </mat-form-field>
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col"
+                    *ngIf="!['wordCloud', 'table', 'bubble'].includes(selectedMode)">
+                  <div class="row mt-1 mb-4">
+                    <div class="fw-bold fs-4">員工查詢</div>
+                  </div>
+                  <div class="row">
+                    <mat-form-field appearance="fill" class="w-100">
+                      <mat-label>搜尋類別</mat-label>
+                      <mat-select (selectionChange)="onSelectUserQueryType($event)" [value]="(userQueryType$ | async)">
+                        <mat-option *ngFor="let type of searchTypes" [value]="type">
+                          {{type}}
+                        </mat-option>
+                      </mat-select>
+                    </mat-form-field>
+                  </div>
+                  <div class="row">
+                    <mat-form-field appearance="outline" class="w-100">
+                      <mat-label>搜尋</mat-label>
+                      <input
+                        matInput
+                        class="text-white"
+                        [formControl]="userQueryTextControl"
+                        [matAutocomplete]="auto">
+                        <mat-autocomplete autoActiveFirstOption #auto="matAutocomplete">
+                          <mat-option *ngFor="let option of (filterOption$ | async)" [value]="option">
+                            {{option}}
+                          </mat-option>
+                        </mat-autocomplete>
+                      <mat-icon class="text-white" matSuffix>manage_search</mat-icon>
+                    </mat-form-field>
+                  </div>
+                </div>
+                <div class="col">
+                  <app-time-select
+                    #start_datetime_pickper
+                    [timingText] = "'開始'"
+                    [timingType] = "'start'"
+                    [timeRange] = "{date: timeRange.start_date, time: timeRange.start_time}"
+                    (timeChange) = "onTimeChange($event)"
+                  ></app-time-select>
+                </div>
+                <div class="col">
+                  <app-time-select
+                    #stop_datetime_pickper
+                    [timingText] = "'結束'"
+                    [timingType] = "'stop'"
+                    [timeRange] = "{date: timeRange.stop_date, time: timeRange.stop_time}"
+                    (timeChange) = "onTimeChange($event)"
+                  ></app-time-select>
+                </div>
+              </div>
+              <div class="row mt-4">
+                <mat-divider></mat-divider>
+              </div>
+              <div class="row mt-3 mb-2 p-0">
+                <div>
+                  <button class="w-100" color="primary" mat-raised-button (click)="onQuery()">開始查詢</button>
+                </div>
+              </div>
+            </div>
+          </mat-card>
+        </div>
+        <div class="col-3">
+          <mat-card class="shadow-sm mt-3 p-3 d-flex flex-column justify-content-center">
+            <div class="row my-3">
+              <div class="fs-3 text-center fw-bold">檢索模式</div>
+            </div>
+            <div class="row justify-content-center">
+              <div class="d-flex justify-content-center">
+                <mat-radio-group color="warn" [value]="selectedMode" class="fs-5 d-flex flex-column"
+                  (change)="onModeChange($event)">
+                  <mat-radio-button class="my-3" value="wordCloud">全廠關鍵字概況(文字雲)</mat-radio-button>
+                  <mat-radio-button class="my-3" value="table">全廠關鍵字概況(統計表)</mat-radio-button>
+                  <mat-radio-button class="my-3" value="bubble">全廠關鍵字概況(泡泡圖)</mat-radio-button>
+                  <mat-radio-button class="my-3" value="allImageSearch">個人歷史行為追蹤分析(圖)</mat-radio-button>
+                  <mat-radio-button class="my-3" value="allTextSearch">個人歷史行為追蹤分析(文)</mat-radio-button>
+                </mat-radio-group>
+              </div>
+            </div>
+          </mat-card>
+        </div>
+      </div>
+    </mat-expansion-panel>
+  </div>
+  <div class="row" [ngSwitch]="selectedMode">
+    <app-table *ngSwitchCase="'table'"></app-table>
+    <app-bubble *ngSwitchCase="'bubble'"></app-bubble>
+    <app-word-cloud (involvePanel)="onInvolvePanel()" *ngSwitchCase="'wordCloud'"></app-word-cloud>
+    <app-all-text-search *ngSwitchCase="'allTextSearch'"></app-all-text-search>
+    <app-all-image-search *ngSwitchCase="'allImageSearch'"></app-all-image-search>
+  </div>
+  <!-- <router-outlet></router-outlet> -->
+</div>

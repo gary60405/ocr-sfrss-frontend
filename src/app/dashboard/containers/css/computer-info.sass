@@ -1,0 +1,25 @@
+.expansion-color
+  background-color: #555
+
+.control-panel
+  width: calc(100% - 2*12px)
+
+:host ::ng-deep .ngx-timepicker-control input
+  background-color: transparent !important
+  font-size: 1rem
+
+:host ::ng-deep .ngx-timepicker
+  justify-content: space-around
+  min-width: 180px
+  max-width: 220px
+  width: 70%
+  height: 32px !important
+  border-bottom: 1px solid #fff !important
+
+:host ::ng-deep .ngx-timepicker-control__arrows
+  top: -5px !important
+  right: -5px !important
+
+:host ::ng-deep .period-control__arrow, :host ::ng-deep .ngx-timepicker-control__arrow, :host ::ng-deep button.ngx-material-timepicker-toggle
+  color: #fff !important
+  fill: #fff
