@@ -4,7 +4,7 @@ import { Computer } from '../models';
 
 export const initialComputers = createAction('[Computer] Initial Computers');
 export const fetchAllkeyword = createAction('[Computer] Fetch All Keywords',
-  props<{ start_datetime: string, stop_datetime: string, backdays: number }>()
+  props<{ userQueryText: string, userQueryType: string, start_datetime: string, stop_datetime: string, backdays: number }>()
 );
 export const fetchAllkeywordSuccess = createAction(
   '[Computer] Fetch All Keywords Success',

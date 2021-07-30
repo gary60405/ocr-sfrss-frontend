@@ -10,7 +10,6 @@ import { TagCloudModule } from 'angular-tag-cloud-module';
 import { MaterialModule } from 'src/app/core/material';
 import {
   ImageCardComponent,
-  BubbleChartComponent,
   KeywordTableComponent,
   TimeSelectComponent
 } from './components';
@@ -19,8 +18,6 @@ import {
   ComputerInfoComponent,
   WordCloudComponent,
   AllImageSearchComponent,
-  AllTextSearchComponent,
-  BubbleComponent,
   TableComponent,
 } from './containers';
 
@@ -32,7 +29,6 @@ import { UserTableComponent } from './components/user-table.component';
 import { SafeHtmlPipe } from '../core/safe-html.pipe';
 
 export const COMPONENTS = [
-  BubbleChartComponent,
   KeywordTableComponent,
   ImageCardComponent,
   TextCardComponent,
@@ -46,8 +42,6 @@ export const CONTAINERS = [
   WordCloudComponent,
   ComputerInfoComponent,
   AllImageSearchComponent,
-  AllTextSearchComponent,
-  BubbleComponent,
   TableComponent,
 ];
 

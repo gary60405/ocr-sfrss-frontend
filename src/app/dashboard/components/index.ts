@@ -1,4 +1,3 @@
-export * from './bubble-chart.component';
 export * from './keyword-table.component';
 export * from './image-card.component';
 export * from './text-card.component';

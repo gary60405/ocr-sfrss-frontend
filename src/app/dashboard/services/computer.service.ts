@@ -14,8 +14,13 @@ export class ComputersService {
   constructor(private httpClient: HttpClient,
               private global: Globals) {}
 
-  fetchAllkeyword(startDatetime: string, stopDatetime: string, backdays: number): Observable<CloudData[]> {
-    const body = { startDatetime, stopDatetime, backdays };
+  fetchAllkeyword(
+    userQueryText: string,
+    userQueryType: string,
+    startDatetime: string,
+    stopDatetime: string,
+    backdays: number): Observable<CloudData[]> {
+    const body = { userQueryText, userQueryType, startDatetime, stopDatetime, backdays };
     return this.httpClient.post<CloudData[]>(this.global.baseUrl + 'get_all_keyword', body, {responseType: 'json'});
   }
 

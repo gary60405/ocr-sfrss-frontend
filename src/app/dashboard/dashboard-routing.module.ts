@@ -5,8 +5,6 @@ import {
   ComputerInfoComponent,
   WordCloudComponent,
   AllImageSearchComponent,
-  AllTextSearchComponent,
-  BubbleComponent,
   TableComponent,
 } from './containers';
 
@@ -29,14 +27,6 @@ export const routes: Routes = [
           {
             path: 'table',
             component: TableComponent,
-          },
-          {
-            path: 'bubble',
-            component: BubbleComponent,
-          },
-          {
-            path: 'allTextSearch',
-            component: AllTextSearchComponent,
           },
           {
             path: 'allImageSearch',

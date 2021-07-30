@@ -1,11 +1,13 @@
 import { Injectable } from '@angular/core';
 
 import { Actions, createEffect, ofType } from '@ngrx/effects';
+import { LayoutActions } from '../../core/actions';
 import { ComputerActions, ComputerInfoActions } from '../actions';
 import { ComputersService } from '../services/computer.service';
 import { map, switchMap } from 'rxjs/operators';
-import { Computer, QueryImageInfo, SelectedComputer } from '../models';
+import { QueryImageInfo } from '../models';
 import { CloudData } from 'angular-tag-cloud-module';
+
 
 @Injectable()
 export class ComputersEffects {
@@ -15,13 +17,18 @@ export class ComputersEffects {
       ofType(ComputerActions.fetchAllkeyword),
       switchMap((action) =>
         this.computersService.fetchAllkeyword(
+          action.userQueryText,
+          action.userQueryType,
           action.start_datetime,
           action.stop_datetime,
           action.backdays
         )
-          .pipe(
-            map((jsonData: any) => jsonData.data),
-            map((allKeywords: CloudData[]) => ComputerActions.fetchAllkeywordSuccess({ allKeywords }))
+        .pipe(
+          map((jsonData: any) => jsonData.data),
+          switchMap((allKeywords: CloudData[]) => [
+            ComputerActions.fetchAllkeywordSuccess({ allKeywords }),
+            LayoutActions.setAlertType({ alertType: 'NORMAL' })
+          ])
         )
       )
     )
@@ -43,7 +50,10 @@ export class ComputersEffects {
         )
         .pipe(
           map((jsonData: any) => jsonData.data),
-          map((queryImageInfo: QueryImageInfo) => ComputerInfoActions.fetchImageInfoSuccess({ queryImageInfo }))
+          switchMap((queryImageInfo: QueryImageInfo) => [
+            ComputerInfoActions.fetchImageInfoSuccess({ queryImageInfo }),
+            LayoutActions.setAlertType({ alertType: 'NORMAL' })
+          ]),
         )
       )
     )

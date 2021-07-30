@@ -58,6 +58,12 @@ export const selectAlertInfo = (state: State): AlertContent => {
           colorClass: 'alert-warning',
           content: '日期格式錯誤，故顯示最近@N日的統計資料'
         };
+      case 'EXECUTING QUERY':
+        return {
+          display: true,
+          colorClass: 'alert-info',
+          content: '資料查詢中...'
+        };
       default:
         return {
           display: false,

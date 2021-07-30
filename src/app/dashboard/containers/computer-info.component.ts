@@ -104,9 +104,8 @@ export class ComputerInfoComponent implements OnInit, AfterViewInit, OnDestroy {
         .pipe(take(1))
         .toPromise()
         .then((params) => {
-          this.isDatetimeValid();
           const url = this.router.url;
-          ['wordCloud', 'table', 'bubble', 'allImageSearch', 'allTextSearch']
+          ['wordCloud', 'table', 'allImageSearch']
             .forEach(mode => {
               if (url.includes(mode)) {
                 this.selectedMode = mode;
@@ -116,8 +115,10 @@ export class ComputerInfoComponent implements OnInit, AfterViewInit, OnDestroy {
           if (this.getNonNullString(params.mode) === '') {
             this.router.navigate([`/dashboard/computerInfo/${this.selectedMode}`, { mode: this.selectedMode }]);
           } else {
-            if (['wordCloud', 'table', 'bubble'].includes(params.mode)) {
+            if (['wordCloud', 'table'].includes(params.mode)) {
               this.computerStore.dispatch(ComputerActions.fetchAllkeyword({
+                userQueryText: this.userQueryText,
+                userQueryType: this.userQueryType,
                 start_datetime: this.getNonNullString(params.start_datetime),
                 stop_datetime: this.getNonNullString(params.stop_datetime),
                 backdays: -this.global.backdaysNum
@@ -141,29 +142,31 @@ export class ComputerInfoComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.routeSubscription1 = this.layoutStore.select(fromRoot.selectRouteNestedParam())
         .subscribe((params) => {
-          this.selectedMode = this.getNonNullString(params.mode);
-          this.timeRange.start_date = this.getDateObject(params.start_datetime?.split(' ')[0]);
-          this.timeRange.stop_date = this.getDateObject(params.stop_datetime?.split(' ')[0]);
-          this.timeRange.start_time = this.getTimeString(params.start_datetime?.split(' ')[1]);
-          this.timeRange.stop_time = this.getTimeString(params.stop_datetime?.split(' ')[1]);
-          this.computerStore.dispatch(ComputerInfoActions.updateDatetime({
-            start_datetime: this.getNonNullString(params.start_datetime),
-            stop_datetime: this.getNonNullString(params.stop_datetime)
-          }));
-
-          if (!['wordCloud', 'table', 'bubble'].includes(params.mode) && this.selectedMode !== '') {
-            this.userQueryTextControl.setValue(this.getNonNullString(params.userQueryText));
+          if (params.invoke !== true) {
+            this.selectedMode = this.getNonNullString(params.mode);
             this.userQueryType = this.getNonNullString(params.userQueryType);
             this.userQueryText = this.getNonNullString(params.userQueryText);
-            this.orQueryfield = this.queryStringToList(params.orQueryfield);
-            this.andQueryfield = this.queryStringToList(params.andQueryfield);
-            this.notQueryfield = this.queryStringToList(params.notQueryfield);
-            this.computerStore.dispatch(ComputerActions.fetchUserData({userQueryType: this.userQueryType}));
+            this.timeRange.start_date = this.getDateObject(params.start_datetime?.split(' ')[0]);
+            this.timeRange.stop_date = this.getDateObject(params.stop_datetime?.split(' ')[0]);
+            this.timeRange.start_time = this.getTimeString(params.start_datetime?.split(' ')[1]);
+            this.timeRange.stop_time = this.getTimeString(params.stop_datetime?.split(' ')[1]);
             this.computerStore.dispatch(ComputerActions.setQueryType({userQueryType: this.userQueryType}));
             this.computerStore.dispatch(ComputerActions.updateQueryText({userQueryText: this.userQueryText}));
-            this.computerStore.dispatch(ComputerInfoActions.updateOrQueryText({orQueryText: this.orQueryfield}));
-            this.computerStore.dispatch(ComputerInfoActions.updateAndQueryText({andQueryText: this.andQueryfield}));
-            this.computerStore.dispatch(ComputerInfoActions.updateNotQueryText({notQueryText: this.notQueryfield}));
+            this.computerStore.dispatch(ComputerInfoActions.updateDatetime({
+              start_datetime: this.getNonNullString(params.start_datetime),
+              stop_datetime: this.getNonNullString(params.stop_datetime)
+            }));
+
+            if (!['wordCloud', 'table'].includes(params.mode) && this.selectedMode !== '') {
+              this.userQueryTextControl.setValue(this.getNonNullString(params.userQueryText));
+              this.orQueryfield = this.queryStringToList(params.orQueryfield);
+              this.andQueryfield = this.queryStringToList(params.andQueryfield);
+              this.notQueryfield = this.queryStringToList(params.notQueryfield);
+              this.computerStore.dispatch(ComputerActions.fetchUserData({userQueryType: this.userQueryType}));
+              this.computerStore.dispatch(ComputerInfoActions.updateOrQueryText({orQueryText: this.orQueryfield}));
+              this.computerStore.dispatch(ComputerInfoActions.updateAndQueryText({andQueryText: this.andQueryfield}));
+              this.computerStore.dispatch(ComputerInfoActions.updateNotQueryText({notQueryText: this.notQueryfield}));
+            }
           }
         });
   }
@@ -171,24 +174,30 @@ export class ComputerInfoComponent implements OnInit, AfterViewInit, OnDestroy {
   ngAfterViewInit() {
     this.routeSubscription2 = this.layoutStore.select(fromRoot.selectRouteNestedParam())
       .subscribe((params) => {
-        if (this.selectedMode !== '') {
-          if (['wordCloud', 'table', 'bubble'].includes(params.mode)) {
-            this.computerStore.dispatch(ComputerActions.fetchAllkeyword({
-              start_datetime: this.getNonNullString(params.start_datetime),
-              stop_datetime: this.getNonNullString(params.stop_datetime),
-              backdays: -this.global.backdaysNum
-            }));
-          } else {
-            this.computerStore.dispatch(ComputerInfoActions.fetchImageInfo({
-              backdays: -this.global.backdaysNum,
-              start_datetime: this.getNonNullString(params.start_datetime),
-              stop_datetime: this.getNonNullString(params.stop_datetime),
-              userQueryText: this.getNonNullString(params.userQueryText),
-              userQueryType: this.getNonNullString(params.userQueryType),
-              orQueryText: this.orQueryfield === undefined ? [] : [ ...this.orQueryfield ],
-              andQueryText: this.andQueryfield === undefined ? [] : [ ...this.andQueryfield ],
-              notQueryText: this.notQueryfield === undefined ? [] : [ ...this.notQueryfield ],
-            }));
+        if (params.invoke !== true) {
+          this.onSelectUserQueryType({value: params.userQueryType});
+          this.userQueryTextControl.setValue(params.userQueryText);
+          if (this.selectedMode !== '') {
+            if (['wordCloud', 'table'].includes(params.mode)) {
+              this.computerStore.dispatch(ComputerActions.fetchAllkeyword({
+                userQueryText: this.userQueryText,
+                userQueryType: this.userQueryType,
+                start_datetime: this.getNonNullString(params.start_datetime),
+                stop_datetime: this.getNonNullString(params.stop_datetime),
+                backdays: -this.global.backdaysNum
+              }));
+            } else {
+              this.computerStore.dispatch(ComputerInfoActions.fetchImageInfo({
+                backdays: -this.global.backdaysNum,
+                start_datetime: this.getNonNullString(params.start_datetime),
+                stop_datetime: this.getNonNullString(params.stop_datetime),
+                userQueryText: this.getNonNullString(params.userQueryText),
+                userQueryType: this.getNonNullString(params.userQueryType),
+                orQueryText: this.orQueryfield === undefined ? [] : [ ...this.orQueryfield ],
+                andQueryText: this.andQueryfield === undefined ? [] : [ ...this.andQueryfield ],
+                notQueryText: this.notQueryfield === undefined ? [] : [ ...this.notQueryfield ],
+              }));
+            }
           }
         }
       });
@@ -215,19 +224,19 @@ export class ComputerInfoComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  onQuery() {
-    this.onNavigate();
-  }
 
   onModeChange(event: any) {
     this.selectedMode = event.value;
     this.computerStore.dispatch(ComputerInfoActions.setComputerInfoMode({ mode: event.value }));
-    this.onNavigate();
+    this.onQuery();
   }
 
-  onNavigate() {
-    if (['wordCloud', 'table', 'bubble'].includes(this.selectedMode)) {
+  onQuery() {
+    this.computerStore.dispatch(LayoutActions.setAlertType({ alertType: 'EXECUTING QUERY' }));
+    if (['wordCloud', 'table'].includes(this.selectedMode)) {
       this.computerStore.dispatch(ComputerActions.fetchAllkeyword({
+        userQueryText: this.userQueryText,
+        userQueryType: this.userQueryType,
         start_datetime: `${this.startDatetimePickper.getDateTime().date} ${this.startDatetimePickper.getDateTime().time}`,
         stop_datetime: `${this.stopDatetimePickper.getDateTime().date} ${this.stopDatetimePickper.getDateTime().time}`,
         backdays: -this.global.backdaysNum
@@ -235,16 +244,21 @@ export class ComputerInfoComponent implements OnInit, AfterViewInit, OnDestroy {
 
       if (this.isDatetimeValid() === 'EMPTY DATE' || this.isDatetimeValid() === 'ERROR DATE FORMAT') {
           this.router.navigate([`/dashboard/computerInfo/${this.selectedMode}`, {
-            mode: this.selectedMode
+            mode: this.selectedMode,
+            userQueryText: this.userQueryText,
+            userQueryType: this.userQueryType,
           }], { relativeTo: this.routes });
       } else {
           this.router.navigate([`/dashboard/computerInfo/${this.selectedMode}`, {
             mode: this.selectedMode,
+            userQueryText: this.userQueryText,
+            userQueryType: this.userQueryType,
             start_datetime: `${this.startDatetimePickper.getDateTime().date} ${this.startDatetimePickper.getDateTime().time}`,
             stop_datetime: `${this.stopDatetimePickper.getDateTime().date} ${this.stopDatetimePickper.getDateTime().time}`
           }], { relativeTo: this.routes });
       }
   } else {
+    this.invokeRouteParam();
     if (this.isDatetimeValid() === 'EMPTY DATE' || this.isDatetimeValid() === 'ERROR DATE FORMAT') {
       this.router.navigate([`/dashboard/computerInfo/${this.selectedMode}`, {
         mode: this.selectedMode,
@@ -271,6 +285,12 @@ export class ComputerInfoComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 }
 
+  invokeRouteParam() { // 讓網址產生變動，解決相同條件下，搜尋不會觸發事件的問題
+    this.router.navigate([`/dashboard/computerInfo/${this.selectedMode}`, {
+      invoke: true
+    }], { relativeTo: this.routes });
+  }
+
   isDatetimeValid() {
     if (this.startDatetimePickper.getDateTime().date === ''
           && this.startDatetimePickper.getDateTime().time === 'undefined:00'
@@ -285,7 +305,6 @@ export class ComputerInfoComponent implements OnInit, AfterViewInit, OnDestroy {
       this.computerStore.dispatch(LayoutActions.setAlertType({ alertType: 'ERROR DATE FORMAT' }));
       return 'ERROR DATE FORMAT';
     } else {
-      this.computerStore.dispatch(LayoutActions.setAlertType({ alertType: 'NORMAL' }));
       return 'NORMAL';
     }
   }

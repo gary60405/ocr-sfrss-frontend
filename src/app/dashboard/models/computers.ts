@@ -81,4 +81,4 @@ export interface AlertContent {
   display: boolean;
   colorClass: string;
   content: string;
-};
+}
